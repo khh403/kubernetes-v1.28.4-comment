@@ -19,6 +19,7 @@ set -o nounset
 set -o pipefail
 
 # Short-circuit if init.sh has already been sourced
+# 如果脚本 hack/lib/init.sh 已经被导入，那么就直接短路退出去
 [[ $(type -t kube::init::loaded) == function ]] && return 0
 
 # Unset CDPATH so that path interpolation can work correctly
@@ -37,10 +38,14 @@ KUBE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 KUBE_OUTPUT_SUBPATH="${KUBE_OUTPUT_SUBPATH:-_output/local}"
 KUBE_OUTPUT="${KUBE_ROOT}/${KUBE_OUTPUT_SUBPATH}"
 KUBE_OUTPUT_BINPATH="${KUBE_OUTPUT}/bin"
+echo "====[test] KUBE_OUTPUT_SUBPATH=$KUBE_OUTPUT_SUBPATH"
+echo "====[test] KUBE_OUTPUT=$KUBE_OUTPUT"
+echo "====[test] KUBE_OUTPUT_BINPATH=$KUBE_OUTPUT_BINPATH"
 
 # This controls rsync compression. Set to a value > 0 to enable rsync
 # compression for build container
 KUBE_RSYNC_COMPRESS="${KUBE_RSYNC_COMPRESS:-0}"
+echo "====[test] KUBE_RSYNC_COMPRESS=$KUBE_RSYNC_COMPRESS"
 
 # Set no_proxy for localhost if behind a proxy, otherwise,
 # the connections to localhost in scripts will time out
@@ -51,6 +56,9 @@ export THIS_PLATFORM_BIN="${KUBE_ROOT}/_output/bin"
 
 source "${KUBE_ROOT}/hack/lib/util.sh"
 source "${KUBE_ROOT}/hack/lib/logging.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/hack/lib/util.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/hack/lib/logging.sh"
+
 
 kube::log::install_errexit
 kube::util::ensure-bash-version
@@ -58,13 +66,20 @@ kube::util::ensure-bash-version
 source "${KUBE_ROOT}/hack/lib/version.sh"
 source "${KUBE_ROOT}/hack/lib/golang.sh"
 source "${KUBE_ROOT}/hack/lib/etcd.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/hack/lib/version.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/hack/lib/golang.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/hack/lib/etcd.sh"
 
+# 获取 主机的 系统类型 我这里时 linux x86_64
+# kube::util::host_platform 函数的返回是：linux/amd64
 KUBE_OUTPUT_HOSTBIN="${KUBE_OUTPUT_BINPATH}/$(kube::util::host_platform)"
 export KUBE_OUTPUT_HOSTBIN
+echo "====[test] KUBE_OUTPUT_HOSTBIN=$KUBE_OUTPUT_HOSTBIN"
 
 # list of all available group versions.  This should be used when generated code
 # or when starting an API server that you want to have everything.
 # most preferred version for a group should appear first
+# 所有 kubernetes 中不同资源的 版本号
 KUBE_AVAILABLE_GROUP_VERSIONS="${KUBE_AVAILABLE_GROUP_VERSIONS:-\
 v1 \
 admissionregistration.k8s.io/v1 \
@@ -121,6 +136,7 @@ flowcontrol.apiserver.k8s.io/v1beta2 \
 flowcontrol.apiserver.k8s.io/v1beta3 \
 internal.apiserver.k8s.io/v1alpha1 \
 }"
+echo "====[test] k8s资源版本号 KUBE_AVAILABLE_GROUP_VERSIONS=$KUBE_AVAILABLE_GROUP_VERSIONS"
 
 # not all group versions are exposed by the server.  This list contains those
 # which are not available so we don't generate clients or swagger for them
@@ -134,6 +150,7 @@ KUBE_NONSERVER_GROUP_VERSIONS="
  admission.k8s.io/v1beta1\
 "
 export KUBE_NONSERVER_GROUP_VERSIONS
+echo "====[test] 尚未开放的k8s资源版本号 KUBE_NONSERVER_GROUP_VERSIONS=$KUBE_NONSERVER_GROUP_VERSIONS"
 
 # This emulates "readlink -f" which is not available on MacOS X.
 # Test:
@@ -164,6 +181,9 @@ export KUBE_NONSERVER_GROUP_VERSIONS
 # testone $T/linkdir/linkdir
 function kube::readlinkdashf {
   # run in a subshell for simpler 'cd'
+  # run in a subshell for simpler 'cd'
+  # 用括号将一串连续指令括起来，这种用法对 shell 来说，称为指令群组。
+  # shell会以产生 subshell来执行这组指令。因此，在其中所定义的变数，仅作用于指令群组本身
   (
     if [[ -d "${1}" ]]; then # This also catch symlinks to dirs.
       cd "${1}"

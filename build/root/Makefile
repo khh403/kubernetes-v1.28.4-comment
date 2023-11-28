@@ -12,40 +12,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# 编译选项 DBG_MAKEFILE 用于调试 Makefile 的选项，这个一般都是在命令行输入选项 DBG_MAKEFILE=1
 DBG_MAKEFILE ?=
 ifeq ($(DBG_MAKEFILE),1)
+	# Makefile:17: ***** starting Makefile for goal(s) ""
+	# Makefile:18: ***** 2023年 11月 28日 星期二 14:53:14 CST
+	# MAKECMDGOALS 这个变量怎么来的还不知道
     $(warning ***** starting Makefile for goal(s) "$(MAKECMDGOALS)")
     $(warning ***** $(shell date))
 else
-    # If we're not debugging the Makefile, don't echo recipes.
+    # 如果我们不调试 Makefile，就不要回显 recipes，使用 MAKEFLAGS 设置编译选项 -s 即 silent 安静模式
     MAKEFLAGS += -s
 endif
 
 
 # Old-skool build tools.
+# 老式的构建工具
 #
 # Commonly used targets (see each target for more information):
-#   all: Build code.
-#   test: Run tests.
-#   clean: Clean up.
+#   all: Build code. 编译所有组件
+#   test: Run tests. 测试
+#   clean: Clean up. 清理
 
 # It's necessary to set this because some environments don't link sh -> bash.
+# 配置 shell 的路径，目的是直接使用 bash shell 而不是系统默认的 sh 环境
 SHELL := /usr/bin/env bash -o errexit -o pipefail -o nounset
+# bash 脚本程序涉及记录日志的一些配置，比如函数定义等
 BASH_ENV := ./hack/lib/logging.sh
 
 # Define variables so `make --warn-undefined-variables` works.
+# PRINT_HELP 变量 表示是否打印帮助信息
+# 条件赋值 ( ?= ) 如果变量未定义，则使用符号中的值定义变量。如果该变量已经赋值，则该赋值语句无效。
 PRINT_HELP ?=
 
 # We don't need make's built-in rules.
+# 扩展编译选项 --no-builtin-rules
 MAKEFLAGS += --no-builtin-rules
+
+# 空的 target
 .SUFFIXES:
 
 # Constants used throughout.
+# 一些常量的初始化
+# 空的 target
 .EXPORT_ALL_VARIABLES:
+# OUT_DIR 表示最终生成的 target 文件的目录，包括可执行文件、镜像、中间文件等
 OUT_DIR ?= _output
+# BIN_DIR 表示生成 target 可执行文件的目录
 BIN_DIR := $(OUT_DIR)/bin
+# kubernetes 的项目跟路径，就是 go.mod 里面模块的名字
 PRJ_SRC_PATH := k8s.io/kubernetes
 
+
+# 设置 vendor 模式
+# KUBE_GOFLAGS 已经丢弃，使用 GOFLAGS
+# go build 编译 golang 程序的时候，使用 GOFLAGS 来指定编译标识，而本项目单独给 makefile 定义了编译选项 KUBE_GOFLAGS 来表示
+# 在命令行编译 k8s 的时候，如果要给 go build 配置编译选项，那么就在命令行上指定 KUBE_GOFLAGS
 ifdef KUBE_GOFLAGS
 $(info KUBE_GOFLAGS is now deprecated. Please use GOFLAGS instead.)
 ifndef GOFLAGS
@@ -57,8 +79,11 @@ endif
 endif
 
 # This controls the verbosity of the build.  Higher numbers mean more output.
+# 控制脚本输出和日志记录的详细程度, KUBE_VERBOSE=1
 KUBE_VERBOSE ?= 1
 
+# make all 编译所有组件
+# 真正执行编译动作的脚本是 hack/make-rules/build.sh $(WHAT)
 define ALL_HELP_INFO
 # Build code.
 #
@@ -83,6 +108,8 @@ define ALL_HELP_INFO
 #           tools like delve. When DBG is unspecified, it defaults to "-s -w" which strips debug
 #           information.
 endef
+
+# 把 all 声明成 伪目标，也就是不会生成 target 文件，只执行为目标后面的命令
 .PHONY: all
 ifeq ($(PRINT_HELP),y)
 all:
@@ -395,6 +422,7 @@ define RELEASE_IMAGES_HELP_INFO
 endef
 .PHONY: release-images
 ifeq ($(PRINT_HELP),y)
+# KUBE_BUILD_CONFORMANCE - 用来控制是否创建一致性测试镜像
 release-images: KUBE_BUILD_CONFORMANCE = y
 release-images:
 	echo "$$RELEASE_IMAGES_HELP_INFO"

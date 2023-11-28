@@ -843,6 +843,7 @@ kube::golang::get_physmem() {
 #     then just the host architecture is built.
 kube::golang::build_binaries() {
   # Create a sub-shell so that we don't pollute the outer environment
+  # 创建一个子shell，这样就不会污染外部环境，这就是 subshell 指令群组的好处
   (
     # Check for `go` binary and set ${GOPATH}.
     kube::golang::setup_env
@@ -850,6 +851,7 @@ kube::golang::build_binaries() {
 
     local host_platform
     host_platform=$(kube::golang::host_platform)
+    echo "====[test] host_platform=$host_platform"
 
     # These are "local" but are visible to and relied on by functions this
     # function calls.  They are effectively part of the calling API to
