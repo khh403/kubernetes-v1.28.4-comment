@@ -1,0 +1,11 @@
+1.修改源代码
+2.编译并发布
+2.1 编译二进制文件
+KUBE_BUILD_PLATFORMS=linux/amd64 KUBE_BUILD_CONFORMANCE=n KUBE_BUILD_HYPERKUBE=n make
+注意：需要在linux上编译
+2.2 发布镜像
+KUBE_BUILD_PLATFORMS=linux/amd64 KUBE_BUILD_CONFORMANCE=n KUBE_BUILD_HYPERKUBE=n make release-images
+注意：需要在linux上有docker环境下发布
+
+### 登陆 ghcr.io
+echo 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 | docker login ghcr.io --username khh403 --password-stdin
