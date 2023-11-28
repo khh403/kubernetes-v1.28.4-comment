@@ -42,8 +42,8 @@ readonly KUBE_BUILD_IMAGE_REPO=kube-build
 KUBE_BUILD_IMAGE_CROSS_TAG="$(cat "${KUBE_ROOT}/build/build-image/cross/VERSION")"
 readonly KUBE_BUILD_IMAGE_CROSS_TAG
 
-readonly KUBE_DOCKER_REGISTRY="${KUBE_DOCKER_REGISTRY:-registry.k8s.io}"
-KUBE_BASE_IMAGE_REGISTRY="${KUBE_BASE_IMAGE_REGISTRY:-registry.k8s.io/build-image}"
+readonly KUBE_DOCKER_REGISTRY="${KUBE_DOCKER_REGISTRY:-ghcr.io/khh403}"
+KUBE_BASE_IMAGE_REGISTRY="${KUBE_BASE_IMAGE_REGISTRY:-ghcr.io/khh403}"
 readonly KUBE_BASE_IMAGE_REGISTRY
 
 # This version number is used to cause everyone to rebuild their data containers
