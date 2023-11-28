@@ -22,18 +22,24 @@ set -o nounset
 set -o pipefail
 
 KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+echo "====[test] KUBE_ROOT=$KUBE_ROOT"
+
 source "${KUBE_ROOT}/build/common.sh"
 source "${KUBE_ROOT}/build/lib/release.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/build/common.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/build/lib/release.sh"
 
 CMD_TARGETS="${KUBE_SERVER_IMAGE_TARGETS[*]}"
 if [[ "${KUBE_BUILD_CONFORMANCE}" =~ [yY] ]]; then
     CMD_TARGETS="${CMD_TARGETS} ${KUBE_CONFORMANCE_IMAGE_TARGETS[*]}"
 fi
+
 # include extra WHAT if specified so you can build docker images + binaries
 # in one call with a single pass of syncing to the container + generating code
 if [[ -n "${KUBE_EXTRA_WHAT:-}" ]]; then
     CMD_TARGETS="${CMD_TARGETS} ${KUBE_EXTRA_WHAT}"
 fi
+echo "====[test] CMD_TARGETS=$CMD_TARGETS"
 
 kube::build::verify_prereqs
 kube::build::build_image

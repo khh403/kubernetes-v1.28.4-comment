@@ -52,8 +52,8 @@ readonly KUBE_BASE_IMAGE_REGISTRY
 #
 # Increment/change this number if you change the build image (anything under
 # build/build-image) or change the set of volumes in the data container.
-KUBE_BUILD_IMAGE_VERSION_BASE="$(cat "${KUBE_ROOT}/build/build-image/VERSION")"
-readonly KUBE_BUILD_IMAGE_VERSION_BASE
+KUBE_BUILD_IMAGE_VERSION_BASE="$(cat "${KUBE_ROOT}/build/build-image/VERSION")" # 5
+readonly KUBE_BUILD_IMAGE_VERSION_BASE # kube-cross 镜像的 TAG: v1.28.0-go1.20.11-bullseye.0
 readonly KUBE_BUILD_IMAGE_VERSION="${KUBE_BUILD_IMAGE_VERSION_BASE}-${KUBE_BUILD_IMAGE_CROSS_TAG}"
 
 # Make it possible to override the `kube-cross` image, and tag independent of `KUBE_BASE_IMAGE_REGISTRY`
@@ -154,39 +154,74 @@ kube::build::get_docker_wrapped_binaries() {
 #   DOCKER_MOUNT_ARGS
 #   LOCAL_OUTPUT_BUILD_CONTEXT
 # shellcheck disable=SC2120 # optional parameters
+# 验证是否安装了 docker 环境
 function kube::build::verify_prereqs() {
+  # require_docker 传入参数：是否要求有docker环境，默认 true
   local -r require_docker=${1:-true}
   kube::log::status "Verifying Prerequisites...."
+  # 必须安装 tar 命令行工具
   kube::build::ensure_tar || return 1
+  # 必须安装 rsync 文件同步命令行工具
   kube::build::ensure_rsync || return 1
   if ${require_docker}; then
+    # 必须能够从环境变量 PATH 中找到 docker 客户端
     kube::build::ensure_docker_in_path || return 1
+    # 如果是 Macos 操作系统
     if kube::build::is_osx; then
         kube::build::docker_available_on_osx || return 1
     fi
+    # 检查 是否可以运行 docker 命令
     kube::util::ensure_docker_daemon_connectivity || return 1
-
+    # 打印 docker Version 信息
     if (( KUBE_VERBOSE > 6 )); then
       kube::log::status "Docker Version:"
       "${DOCKER[@]}" version | kube::log::info_from_stdin
     fi
   fi
 
+  # 当前的 git 分支（master/develop）
   KUBE_GIT_BRANCH=$(git symbolic-ref --short -q HEAD 2>/dev/null || true)
+  # 用 md5 命令求 hash 值： HOSTNAME+KUBE_ROOT+KUBE_GIT_BRANCH（1b350c855c）
   KUBE_ROOT_HASH=$(kube::build::short_hash "${HOSTNAME:-}:${KUBE_ROOT}:${KUBE_GIT_BRANCH}")
+  # build 出 image 的 tag前缀 为 build-Hash值（build-1b350c855c）
   KUBE_BUILD_IMAGE_TAG_BASE="build-${KUBE_ROOT_HASH}"
+  # KUBE_BUILD_IMAGE_VERSION 为 5-v1.28.0-go1.20.11-bullseye.0
+  # build 出 image 的 整个 tag build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0
   KUBE_BUILD_IMAGE_TAG="${KUBE_BUILD_IMAGE_TAG_BASE}-${KUBE_BUILD_IMAGE_VERSION}"
+  # 需要构建的镜像名称：kube-build:build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0
   KUBE_BUILD_IMAGE="${KUBE_BUILD_IMAGE_REPO}:${KUBE_BUILD_IMAGE_TAG}"
+  # 这里一共需要 三个容器来进行构建工作：
+  # 1. BUILD 容器，构建容器
+  # 2. RSYNC 容器，同步数据容器
+  # 3. DATA 容器，存储容器
   KUBE_BUILD_CONTAINER_NAME_BASE="kube-build-${KUBE_ROOT_HASH}"
   KUBE_BUILD_CONTAINER_NAME="${KUBE_BUILD_CONTAINER_NAME_BASE}-${KUBE_BUILD_IMAGE_VERSION}"
   KUBE_RSYNC_CONTAINER_NAME_BASE="kube-rsync-${KUBE_ROOT_HASH}"
   KUBE_RSYNC_CONTAINER_NAME="${KUBE_RSYNC_CONTAINER_NAME_BASE}-${KUBE_BUILD_IMAGE_VERSION}"
   KUBE_DATA_CONTAINER_NAME_BASE="kube-build-data-${KUBE_ROOT_HASH}"
   KUBE_DATA_CONTAINER_NAME="${KUBE_DATA_CONTAINER_NAME_BASE}-${KUBE_BUILD_IMAGE_VERSION}"
+  # DATA 容器挂载目录的路径
   DOCKER_MOUNT_ARGS=(--volumes-from "${KUBE_DATA_CONTAINER_NAME}")
+  # 这个是编译 kube-build 镜像的路径，也就是 Dockerfile 的所在的目录，目录为：_output/images/kube-build:build-HASH-5-v1.16.1-1/
   LOCAL_OUTPUT_BUILD_CONTEXT="${LOCAL_OUTPUT_IMAGE_STAGING}/${KUBE_BUILD_IMAGE}"
+  echo "====[test] KUBE_GIT_BRANCH=$KUBE_GIT_BRANCH"
+  echo "====[test] KUBE_ROOT_HASH=$KUBE_ROOT_HASH"
+  echo "====[test] KUBE_BUILD_IMAGE_TAG_BASE=$KUBE_BUILD_IMAGE_TAG_BASE"
+  echo "====[test] KUBE_BUILD_IMAGE_TAG=$KUBE_BUILD_IMAGE_TAG"
+  echo "====[test] KUBE_BUILD_IMAGE=$KUBE_BUILD_IMAGE"
+  echo "====[test] KUBE_BUILD_CONTAINER_NAME_BASE=$KUBE_BUILD_CONTAINER_NAME_BASE"
+  echo "====[test] KUBE_BUILD_CONTAINER_NAME=$KUBE_BUILD_CONTAINER_NAME"
+  echo "====[test] KUBE_RSYNC_CONTAINER_NAME_BASE=$KUBE_RSYNC_CONTAINER_NAME_BASE"
+  echo "====[test] KUBE_RSYNC_CONTAINER_NAME=$KUBE_RSYNC_CONTAINER_NAME"
+  echo "====[test] KUBE_DATA_CONTAINER_NAME_BASE=$KUBE_DATA_CONTAINER_NAME_BASE"
+  echo "====[test] KUBE_DATA_CONTAINER_NAME=$KUBE_DATA_CONTAINER_NAME"
+  echo "====[test] DOCKER_MOUNT_ARGS=$DOCKER_MOUNT_ARGS"
+  echo "====[test] LOCAL_OUTPUT_BUILD_CONTEXT=$LOCAL_OUTPUT_BUILD_CONTEXT"
 
+  # 设置 git 相关的环境变量
   kube::version::get_version_vars
+
+  # 将上述环境变量 保存在 指定的文件中
   kube::version::save_version_vars "${KUBE_ROOT}/.dockerized-kube-version-defs"
 
   # Without this, the user's umask can leak through.
