@@ -26,10 +26,15 @@ set -o nounset
 set -o pipefail
 
 KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
+echo "====[test] KUBE_ROOT=$KUBE_ROOT"
+
 source "${KUBE_ROOT}/build/common.sh"
 source "${KUBE_ROOT}/build/lib/release.sh"
+echo "====[test] load ${KUBE_ROOT}/build/common.sh"
+echo "====[test] load ${KUBE_ROOT}/build/lib/release.sh"
 
 KUBE_RELEASE_RUN_TESTS=${KUBE_RELEASE_RUN_TESTS-y}
+echo "====[test] KUBE_RELEASE_RUN_TESTS=$KUBE_RELEASE_RUN_TESTS"
 
 kube::build::verify_prereqs
 kube::build::build_image

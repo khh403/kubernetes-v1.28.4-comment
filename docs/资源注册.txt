@@ -1,0 +1,24 @@
+1.资源的注册过程不是函数调用触发的，而是通过 import 和 init 机制触发的。前面提到过的 import "k8s.io/kubernetes/pkg/api/legacyscheme"
+资源注册包括两步：
+初始化 Scheme 资源注册表
+注册 k8s 所支持的资源
+
+1.1 初始化Scheme资源注册表
+代码路径：pkg/api/legacyscheme/scheme.go
+定义了三个全局变量服务于kube-apiserver，组件在任何地方都可以调用:
+
+package legacyscheme
+
+import (
+  "k8s.io/apimachinery/pkg/runtime"
+  "k8s.io/apimachinery/pkg/runtime/serializer"
+)
+
+// Scheme 资源注册表
+var Scheme = runtime.NewScheme()
+// Codec 编解码器
+var Codecs = serializer.NewCodecFactory(Scheme)
+// 参数编解码器
+var ParameterCodec = runtime.NewParameterCodec(Scheme)
+
+1.2 注册 k8s 所支持的资源

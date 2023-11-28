@@ -42,8 +42,8 @@ readonly KUBE_BUILD_IMAGE_REPO=kube-build
 KUBE_BUILD_IMAGE_CROSS_TAG="$(cat "${KUBE_ROOT}/build/build-image/cross/VERSION")"
 readonly KUBE_BUILD_IMAGE_CROSS_TAG
 
-readonly KUBE_DOCKER_REGISTRY="${KUBE_DOCKER_REGISTRY:-registry.k8s.io}"
-KUBE_BASE_IMAGE_REGISTRY="${KUBE_BASE_IMAGE_REGISTRY:-registry.k8s.io/build-image}"
+readonly KUBE_DOCKER_REGISTRY="${KUBE_DOCKER_REGISTRY:-ghcr.io/khh403}"
+KUBE_BASE_IMAGE_REGISTRY="${KUBE_BASE_IMAGE_REGISTRY:-ghcr.io/khh403}"
 readonly KUBE_BASE_IMAGE_REGISTRY
 
 # This version number is used to cause everyone to rebuild their data containers
@@ -376,27 +376,63 @@ function kube::build::clean() {
 
 # Set up the context directory for the kube-build image and build it.
 function kube::build::build_image() {
+  # 创建编译容器的 Dockerfile 的目录
+  echo "====[test] 创建目录 ${LOCAL_OUTPUT_BUILD_CONTEXT}"
   mkdir -p "${LOCAL_OUTPUT_BUILD_CONTEXT}"
+
+  # 修改 Dockerfile 所在的目录的属主和属组
   # Make sure the context directory owned by the right user for syncing sources to container.
+  echo "====[test] 更改目录属组 ${USER_ID}:${GROUP_ID}"
   chown -R "${USER_ID}":"${GROUP_ID}" "${LOCAL_OUTPUT_BUILD_CONTEXT}"
 
+  # 将 时区文件 拷贝到 该目录中
   cp /etc/localtime "${LOCAL_OUTPUT_BUILD_CONTEXT}/"
   chmod u+w "${LOCAL_OUTPUT_BUILD_CONTEXT}/localtime"
 
+  # 拷贝 build/build-image/Dockerfile 文件 和 build/build-image/rsyncd.sh 脚本
   cp "${KUBE_ROOT}/build/build-image/Dockerfile" "${LOCAL_OUTPUT_BUILD_CONTEXT}/Dockerfile"
   cp "${KUBE_ROOT}/build/build-image/rsyncd.sh" "${LOCAL_OUTPUT_BUILD_CONTEXT}/"
+
+  # dd 可从标准输入或文件中读取数据，根据指定的格式来转换数据，再输出到文件、设备或标准输出。
+  # 参数：
+  # if=文件名：输入文件名
+  # of=文件名：输出文件名
+  # bs=bytes：同时设置读入/输出的块大小为bytes个字节
+  # count=blocks：仅拷贝blocks个块，块大小等于ibs指定的字节数。
+  # 生成随机的密码
   dd if=/dev/urandom bs=512 count=1 2>/dev/null | LC_ALL=C tr -dc 'A-Za-z0-9' | dd bs=32 count=1 2>/dev/null > "${LOCAL_OUTPUT_BUILD_CONTEXT}/rsyncd.password"
   chmod go= "${LOCAL_OUTPUT_BUILD_CONTEXT}/rsyncd.password"
 
+  # 使用 docker 命令 build image 构建镜像
+  # 第一个参数：需要 build 的 image 名称:
+  # 第二个参数：Dockerfile 所在的目录
+  # 第三个参数：-pull 参数，默认 true，表示是否下载最新的版本
+  # 第四个参数：--build-args 参数，表示build时的环境变量
+  # kube::build::docker_build 这个函数就是执行一个 docker build 命令
+  # 完整的 docker build 命令为：docker build -t "${image}" "--pull=${pull}" "${build_args[@]}" "${context_dir}"
+  echo "====[test] 要构建的镜像 ${KUBE_BUILD_IMAGE}"                          # kube-build:build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0
+  echo "====[test] 构建镜像的Dockerfile目录 ${LOCAL_OUTPUT_BUILD_CONTEXT}"    # _output/images/kube-build:build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0
+  echo "====[test] 构建镜像需要的环境变量 KUBE_CROSS_IMAGE=${KUBE_CROSS_IMAGE}"     # KUBE_CROSS_IMAGE=registry.k8s.io/build-image/kube-cross
+  echo "====[test] 构建镜像需要的环境变量 KUBE_CROSS_VERSION=${KUBE_CROSS_VERSION}" # KUBE_CROSS_VERSION=v1.28.0-go1.20.11-bullseye.0
   kube::build::docker_build "${KUBE_BUILD_IMAGE}" "${LOCAL_OUTPUT_BUILD_CONTEXT}" 'false' "--build-arg=KUBE_CROSS_IMAGE=${KUBE_CROSS_IMAGE} --build-arg=KUBE_CROSS_VERSION=${KUBE_CROSS_VERSION}"
 
+  # Clean up old versions of everything
+  # 清除所有满足正则的 containers
+  # 第一个参数，要清除的 containers 名称的前缀
+  # 第二个参数，要保留的 container 名称
+  # 这里主要是清除之前编译构建的 BUILD、RSYNC、DATA cantainer
   # Clean up old versions of everything
   kube::build::docker_delete_old_containers "${KUBE_BUILD_CONTAINER_NAME_BASE}" "${KUBE_BUILD_CONTAINER_NAME}"
   kube::build::docker_delete_old_containers "${KUBE_RSYNC_CONTAINER_NAME_BASE}" "${KUBE_RSYNC_CONTAINER_NAME}"
   kube::build::docker_delete_old_containers "${KUBE_DATA_CONTAINER_NAME_BASE}" "${KUBE_DATA_CONTAINER_NAME}"
+
+  # 删除所有与标签前缀匹配的 image（“当前”版本除外）
   kube::build::docker_delete_old_images "${KUBE_BUILD_IMAGE_REPO}" "${KUBE_BUILD_IMAGE_TAG_BASE}" "${KUBE_BUILD_IMAGE_TAG}"
 
+  # 确保 DATA 容器运行
   kube::build::ensure_data_container
+
+  # 将 本机的数据 拷贝到 容器中
   kube::build::sync_to_container
 }
 
@@ -415,6 +451,20 @@ function kube::build::docker_build() {
   IFS=" " read -r -a build_args <<< "$4"
   readonly build_args
   local -ra build_cmd=("${DOCKER[@]}" buildx build --load -t "${image}" "--pull=${pull}" "${build_args[@]}" "${context_dir}")
+
+  printf '====[test] build_cmd=%s\n' "${build_cmd[@]}"
+#   ====[test] build_cmd=docker
+#   ====[test] build_cmd=buildx
+#   ====[test] build_cmd=build
+#   ====[test] build_cmd=--load
+#   ====[test] build_cmd=-t
+#   ====[test] build_cmd=kube-build:build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0
+#   ====[test] build_cmd=--pull=false
+#   ====[test] build_cmd=--build-arg=KUBE_CROSS_IMAGE=registry.k8s.io/build-image/kube-cross
+#   ====[test] build_cmd=--build-arg=KUBE_CROSS_VERSION=v1.28.0-go1.20.11-bullseye.0
+#   ====[test] build_cmd=/root/go/src/kubernetes-v1.28.4-comment/_output/images/kube-build:build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0
+#   docker buildx build --load -t kube-build:build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0 --pull=false --build-arg=KUBE_CROSS_IMAGE=registry.k8s.io/build-image/kube-cross --build-arg=KUBE_CROSS_VERSION=v1.28.0-go1.20.11-bullseye.0 /root/go/src/kubernetes-v1.28.4-comment/_output/images/kube-build:build-1b350c855c-5-v1.28.0-go1.20.11-bullseye.0
+
 
   kube::log::status "Building Docker image ${image}"
   local docker_output
