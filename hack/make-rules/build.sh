@@ -21,8 +21,13 @@ set -o nounset
 set -o pipefail
 
 KUBE_ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
+echo "====[test] KUBE_ROOT=$KUBE_ROOT"
 KUBE_VERBOSE="${KUBE_VERBOSE:-1}"
-source "${KUBE_ROOT}/hack/lib/init.sh"
+echo "====[test] KUBE_VERBOSE=$KUBE_VERBOSE"
 
+source "${KUBE_ROOT}/hack/lib/init.sh"
+echo "====[test] 导入脚本 ${KUBE_ROOT}/hack/lib/init.sh"
+
+# hack/lib/golang.sh
 kube::golang::build_binaries "$@"
 kube::golang::place_bins

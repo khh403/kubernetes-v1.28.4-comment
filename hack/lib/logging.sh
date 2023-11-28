@@ -15,6 +15,7 @@
 # limitations under the License.
 
 # Controls verbosity of the script output and logging.
+# 控制脚本输出和日志记录的详细程度, KUBE_VERBOSE=2
 KUBE_VERBOSE="${KUBE_VERBOSE:-2}"
 
 # Handler for when we exit automatically on an error.
