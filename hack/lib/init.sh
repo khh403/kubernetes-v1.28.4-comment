@@ -18,8 +18,26 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+# 这个脚本主要做了一些初始化操作:
+#   unset CDPATH
+#   export GO111MODULE=off
+#   设置 KUBE_ROOT
+#   设置 KUBE_OUTPUT_SUBPATH
+#   设置 KUBE_OUTPUT
+#   设置 KUBE_OUTPUT_BINPATH
+#   设置 KUBE_RSYNC_COMPRESS
+#   设置 THIS_PLATFORM_BIN
+#   kube::log::install_errexit
+#   kube::util::ensure-bash-version
+#   设置 KUBE_AVAILABLE_GROUP_VERSIONS 当前版本支持的 Group
+#   设置 KUBE_NONSERVER_GROUP_VERSIONS 当前版本不支持的 Group
+#   定义函数 kube::realpath
+#   定义函数 kube::init::loaded
+
+
 # Short-circuit if init.sh has already been sourced
 # 如果脚本 hack/lib/init.sh 已经被导入，那么就直接短路退出去
+# 这个脚本的主要用途就是被其它脚本导入，已到达初始化一些配置的目的
 [[ $(type -t kube::init::loaded) == function ]] && return 0
 
 # Unset CDPATH so that path interpolation can work correctly

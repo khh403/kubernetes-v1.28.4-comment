@@ -139,6 +139,7 @@ all:
 else
 all:
 # make all WHAT=cmd/kubelet GOFLAGS=-v
+# make all
 	hack/make-rules/build.sh $(WHAT)
 endif
 
