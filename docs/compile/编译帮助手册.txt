@@ -1,0 +1,397 @@
+1.打印帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make help
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build code.
+#
+# Args:
+#   WHAT: Directory names to build.  If any of these directories has a 'main'
+#     package, the build will produce executable files under _output/bin.
+#     If not specified, "everything" will be built.
+#     "vendor/<module>/<path>" is accepted as alias for "<module>/<path>".
+#     "ginkgo" is an alias for the ginkgo CLI.
+#   GOFLAGS: Extra flags to pass to 'go' when building.
+#   GOLDFLAGS: Extra linking flags passed to 'go' when building.
+#   GOGCFLAGS: Additional go compile flags passed to 'go' when building.
+#   DBG: If set to "1", build with optimizations disabled for easier
+#     debugging.  Any other value is ignored.
+# 选项/参数：
+#   WHAT: WHAT=<要构建的命令行目录名>。如果这些目录中有一个 "main" 包，构建将在 _output/bin 下生成可执行文件。
+#     如果没有指定，所有的可执行文件都将被构建。
+#     "vendor/<module>/<path>" 可以作为 "<module>/<path>" 的别名。
+#     "ginkgo" 是命令 ginkgo CLI 的别名。
+#   GOFLAGS: 在构建时传递给"go"的额外标志。
+#   GOLDFLAGS: 在构建时传递给"go"的额外链接标志。
+#   DBG: 如果设置为"1"，则构建时禁用优化，以便于调试。其他值将被忽略。
+# Example:
+#   make
+#   make all
+#   make all WHAT=cmd/kubelet GOFLAGS=-v
+#   make all DBG=1
+#     Note: Specify DBG=1 for building unstripped binaries, which allows you to use code debugging
+#           tools like delve. When DBG is unspecified, it defaults to "-s -w" which strips debug
+#           information.
+#     注意:为构建未剥离的二进制文件指定DBG=1，这允许您使用像delve这样的代码调试工具。当DBG未指定时，默认为"-s -w"，它将删除调试信息。
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2.打印 ginkgo 测试的帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make ginkgo
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build ginkgo
+#
+# Example:
+# make ginkgo
+
+# Ginkgo 是一个 Go 测试框架，见 https://ke-chain.github.io/ginkgodoc/
+# BDD, 行为驱动开发（BDD， Behavior-Driven Development）
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+3.打印 verify 运行提交前验证的帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make verify
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Runs all the presubmission verifications. 运行所有提交前验证
+#
+# Args:
+#   BRANCH: Branch to be passed to verify-vendor.sh script.
+#   WHAT: List of checks to run
+#
+# Example:
+#   make verify
+#   make verify BRANCH=branch_x
+#   make verify WHAT="gofmt typecheck"
+
+# make verify 命令通常是用于运行预提交（presubmission）验证。
+# 这是软件开发过程中的一种常见实践，旨在确保提交到代码仓库的代码符合一定的质量标准和规范。
+# 预提交验证可以包括以下内容：
+# 代码风格检查：使用工具（如 linters）检查代码是否符合项目中定义的代码风格规范。这有助于确保代码的一致性和可读性。
+# 静态代码分析：通过静态代码分析工具（如静态分析器）检查代码中潜在的错误、漏洞或不良实践。
+# 单元测试：运行单元测试套件以确保代码的功能正确性。这些测试通常是针对代码的单个组件或模块进行的。
+# 集成测试：如果适用，可以运行集成测试以验证不同组件或模块之间的交互是否正确。
+# 依赖检查：检查代码中的依赖项是否满足项目的要求，并确保它们的版本符合预期。
+# 通过运行 make verify，开发人员可以在提交代码之前自动执行这些验证步骤，从而尽早发现并解决潜在的问题。这有助于提高代码的质量，
+# 并减少因错误提交而导致的后续问题。
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+4.打印 quick-verify 运行快速提交前验证的帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make quick-verify
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Runs only the presubmission verifications that aren't slow.
+# 只运行不慢的提交前验证。
+#
+# Example:
+#   make quick-verify
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+5.打印 update 运行更新脚本的帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make update
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Runs all the update scripts. 运行所有更新脚本
+#
+# Example:
+# make update
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+6.打印 check test 单元测试帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make check test
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build and run tests.
+# 构建并运行测试。运行所有 _test.go 文件
+#
+# Args:
+#   WHAT: Directory names to test.  All *_test.go files under these
+#     directories will be run.  If not specified, "everything" will be tested.
+#   TESTS: Same as WHAT.
+#   KUBE_COVER: Whether to run tests with code coverage. Set to 'y' to enable coverage collection.
+#   GOFLAGS: Extra flags to pass to 'go' when building.
+#   GOLDFLAGS: Extra linking flags to pass to 'go' when building.
+#   GOGCFLAGS: Additional go compile flags passed to 'go' when building.
+#
+# Example:
+#   make check
+#   make test
+#   make check WHAT=./pkg/kubelet GOFLAGS=-v
+# Build and run tests.
+#
+# Args:
+#   WHAT: Directory names to test.  All *_test.go files under these
+#     directories will be run.  If not specified, "everything" will be tested.
+#   TESTS: Same as WHAT.
+#   KUBE_COVER: Whether to run tests with code coverage. Set to 'y' to enable coverage collection.
+#   GOFLAGS: Extra flags to pass to 'go' when building.
+#   GOLDFLAGS: Extra linking flags to pass to 'go' when building.
+#   GOGCFLAGS: Additional go compile flags passed to 'go' when building.
+#
+# Example:
+#   make check
+#   make test
+#   make check WHAT=./pkg/kubelet GOFLAGS=-v
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+7.打印 test-integration 集成测试帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make test-integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build and run integration tests.
+# 构建并运行集成测试。
+# make check test       单元测试
+# make test-integration 集成测试
+#
+# Args:
+#   WHAT: Directory names to test.  All *_test.go files under these
+#     directories will be run.  If not specified, "everything" will be tested.
+#
+# Example:
+#   make test-integration
+#   make test-integration WHAT=./test/integration/kubelet GOFLAGS="-v -coverpkg=./pkg/kubelet/..." KUBE_COVER="y"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+8.打印 test-e2e-node 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make test-e2e-node
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build and run node end-to-end tests.
+# 构建并运行节点端到端测试。
+#
+# Args:
+#  FOCUS: Regexp that matches the tests to be run.  Defaults to "".
+#  SKIP: Regexp that matches the tests that needs to be skipped.
+#    Defaults to "\[Flaky\]|\[Slow\]|\[Serial\]".
+#  TEST_ARGS: A space-separated list of arguments to pass to node e2e test.
+#    Defaults to "".
+#  RUN_UNTIL_FAILURE: If true, pass --until-it-fails=true to ginkgo so tests are run
+#    repeatedly until they fail.  Defaults to false.
+#  REMOTE: If true, run the tests on a remote host.  Defaults to false.
+#  REMOTE_MODE: For REMOTE=true only.  Mode for remote execution (eg. gce, ssh).
+#    If set to "gce", an instance can be provisioned or reused from GCE. If set
+#    to "ssh", provided `HOSTS` must be IPs or resolvable.  Defaults to "gce".
+#  ARTIFACTS: Local directory to scp test artifacts into from the remote hosts
+#    for REMOTE=true. Local directory to write juntil xml results into for REMOTE=false.
+#    Defaults to "/tmp/_artifacts/$(date +%y%m%dT%H%M%S)".
+#  TIMEOUT: For REMOTE=true only. How long (in golang duration format) to wait
+#    for ginkgo tests to complete. Defaults to 45m.
+#  PARALLELISM: The number of ginkgo nodes to run.  Defaults to 8.
+#  CONTAINER_RUNTIME_ENDPOINT: remote container endpoint to connect to.
+#    Defaults to "/run/containerd/containerd.sock".
+#  IMAGE_SERVICE_ENDPOINT: remote image endpoint to connect to, to prepull images.
+#    Used when RUNTIME is set to "remote".
+#  IMAGE_CONFIG_FILE: path to a file containing image configuration.
+#  IMAGE_CONFIG_DIR: path to image config files.
+#  SYSTEM_SPEC_NAME: The name of the system spec to be used for validating the
+#    image in the node conformance test. The specs are located at
+#    test/e2e_node/system/specs/. For example, "SYSTEM_SPEC_NAME=gke" will use
+#    the spec at test/e2e_node/system/specs/gke.yaml. If unspecified, the
+#    default built-in spec (system.DefaultSpec) will be used.
+#  IMAGES: For REMOTE=true only.  Comma delimited list of images for creating
+#    remote hosts to run tests against.  Defaults to a recent image.
+#  HOSTS: For REMOTE=true only.  Comma delimited list of running gce hosts to
+#    run tests against.  Defaults to "".
+#  DELETE_INSTANCES: For REMOTE=true only.  Delete any instances created as
+#    part of this test run.  Defaults to false.
+#  PREEMPTIBLE_INSTANCES: For REMOTE=true only.  Mark created gce instances
+#    as preemptible.  Defaults to false.
+#  CLEANUP: For REMOTE=true only.  If false, do not stop processes or delete
+#    test files on remote hosts.  Defaults to true.
+#  IMAGE_PROJECT: For REMOTE=true only.  Project containing images provided to
+#    $IMAGES.  Defaults to "cos-cloud".
+#  INSTANCE_PREFIX: For REMOTE=true only.  Instances created from images will
+#    have the name "${INSTANCE_PREFIX}-${IMAGE_NAME}".  Defaults to "test".
+#  INSTANCE_METADATA: For REMOTE=true and running on GCE only.
+#  GUBERNATOR: For REMOTE=true only. Produce link to Gubernator to view logs.
+#    Defaults to false.
+#  TEST_SUITE: For REMOTE=true only. Test suite to use. Defaults to "default".
+#  SSH_USER: For REMOTE=true only  SSH username to use.
+#  SSH_KEY: For REMOTE=true only. Path to SSH key to use.
+#  SSH_OPTIONS: For REMOTE=true only. SSH options to use.
+#  INSTANCE_TYPE: For REMOTE=true only. Machine type to use.
+#  NODE_ENV: For REMOTE=true only. Additional metadata keys to add the instance.
+#  RUNTIME_CONFIG: The runtime configuration for the API server on the node e2e tests.
+#
+# Example:
+#   make test-e2e-node FOCUS=Kubelet SKIP=container
+#   make test-e2e-node REMOTE=true DELETE_INSTANCES=true
+#   make test-e2e-node TEST_ARGS='--kubelet-flags="--cgroups-per-qos=true"'
+# Build and run tests.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+9.打印 test-cmd 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make test-cmd
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build and run cmdline tests.
+# 构建并运行cmdline测试。
+#
+# Args:
+#   WHAT: List of tests to run, check test/cmd/legacy-script.sh for names.
+#     For example, WHAT=deployment will run run_deployment_tests function.
+# Example:
+#   make test-cmd
+#   make test-cmd WHAT="deployment impersonation"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+10.打印 clean 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make clean
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove all build artifacts.
+#
+# Example:
+#   make clean
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+11.打印 clean 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make generated_files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 'make generated_files' is deprecated.  Please use hack/update-codegen.sh instead.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+12.打印 vet 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make vet
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run 'go vet'.
+#
+# Args:
+#   WHAT: Directory names to vet.  All *.go files under these
+#     directories will be vetted.  If not specified, "everything" will be
+#     vetted.
+#
+# Example:
+#   make vet
+#   make vet WHAT=./pkg/kubelet
+
+# go vet 是 Go 语言工具链中的一个静态代码分析工具，用于检查 Go 代码中的常见错误和潜在问题。它可以帮助开发者发现一些在编译时难以发现的错误，
+# 提高代码质量和可靠性。
+# go vet 主要用于以下几个方面的检查：
+# 未使用的变量：检查代码中声明但未使用的变量，帮助清理不必要的代码。
+# 未导出的变量和函数：检查是否有未导出的变量或函数被引用，这可能是错误或者意外的行为。
+# 错误的 Printf 格式化字符串：检查 Printf、Sprintf 等函数的格式化字符串是否与参数匹配，以避免运行时错误。
+# 类型转换：检查代码中的类型转换是否正确，避免潜在的类型错误。
+# 错误的 struct tag：检查 struct tag 是否符合规范。
+# 无效的方法调用：检查是否有对无效接收器类型的方法调用。
+# 等等。
+# 通过运行 go vet 命令，开发者可以在编译前对代码进行静态分析，及时发现并修复一些潜在的问题，从而提高代码质量、减少错误，并减少后续调试的时间。
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+13.打印 lint 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make lint
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run golangci-lint
+#
+# Example:
+#   make lint
+
+# golint 是 Go 语言的另一个工具，用于检查 Go 代码中的风格问题和潜在的改进点。它会检查代码的格式、命名约定以及一些不符合 Go 语言惯用法的写法。
+# golint 不会检测语法错误或者代码逻辑错误，而是关注于代码的可读性和规范性。
+# go vet 主要用于检测代码中的静态错误，而 golint 则主要用于检查代码的风格和规范性。在开发过程中，这两个工具经常结合使用，以确保代码的质量和一致性。
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+14.打印 release release-in-a-container 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make release
+PRINT_HELP=y make release-in-a-container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build a release
+# 构建一个发布
+# Use the 'release-in-a-container' target to build the release when already in
+# a container vs. creating a new container to build in using the 'release'
+# target.  Useful for running in GCB.
+# 使用“release-in-a-container”目标来构建已经在容器中的版本，而不是使用“release”目标创建一个新的容器来构建。用于在GCB中运行。
+#
+# Example:
+#   make release
+#   make release-in-a-container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+15.打印 release-images 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make release-images
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build release images
+# 构建发布镜像
+#
+# Args:
+#   KUBE_BUILD_CONFORMANCE: Whether to build conformance testing image as well. Set to 'n' to skip.
+#   DBG: If set to "1", build with optimizations disabled for easier debugging. Any other value is ignored.
+#
+# Example:
+#   make release-images
+#   make release-images DBG=1
+#     Note: Specify DBG=1 for building unstripped binaries, which allows you to use code debugging
+#           tools like delve. When DBG is unspecified, it defaults to "-s -w" which strips debug
+#           information.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+16.打印 release-skip-tests quick-release 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make release-skip-tests
+PRINT_HELP=y make quick-release
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build a release, but skip tests
+# 跳过测试，直接构建发布镜像
+#
+# Args:
+#   KUBE_RELEASE_RUN_TESTS: Whether to run tests. Set to 'y' to run tests anyways.
+#   KUBE_FASTBUILD: Whether to cross-compile for other architectures. Set to 'false' to do so.
+#   KUBE_DOCKER_REGISTRY: Registry of released images, default to registry.k8s.io
+#   KUBE_BASE_IMAGE_REGISTRY: Registry of base images for controlplane binaries, default to registry.k8s.io/build-image
+#
+# Example:
+#   make release-skip-tests
+#   make quick-release
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+16.打印 quick-release-images 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make quick-release-images
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Build release images, but only for linux/amd64
+# 构建发布镜像，但只是 linux/amd64 版本
+#
+# Args:
+#   KUBE_FASTBUILD: Whether to cross-compile for other architectures. Set to 'false' to do so.
+#   KUBE_BUILD_CONFORMANCE: Whether to build conformance testing image as well. Set to 'y' to do so.
+#   DBG: If set to "1", build with optimizations disabled for easier debugging. Any other value is ignored.
+#
+# Example:
+#   make quick-release-images
+#   make quick-release-images DBG=1
+#     Note: Specify DBG=1 for building unstripped binaries, which allows you to use code debugging
+#           tools like delve. When DBG is unspecified, it defaults to "-s -w" which strips debug
+#           information.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+17.打印 package package-tarballs 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make package
+PRINT_HELP=y make package-tarballs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Package tarballs
+# Use the 'package-tarballs' target to run the final packaging steps of a release.
+#
+# Example:
+#   make package-tarballs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+18.打印 cross cross-in-a-container 帮助信息
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRINT_HELP=y make cross
+PRINT_HELP=y make cross-in-a-container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Cross-compile for all platforms
+# 交叉编译所有平台
+#
+# Use the 'cross-in-a-container' target to cross build when already in
+# a container vs. creating a new container to build from (build-image)
+# Useful for running in GCB.
+#
+# Example:
+#   make cross
+#   make cross-in-a-container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
