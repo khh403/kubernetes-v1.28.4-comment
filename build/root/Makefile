@@ -14,16 +14,26 @@
 
 # 编译选项 DBG_MAKEFILE 用于调试 Makefile 的选项，这个一般都是在命令行输入选项 DBG_MAKEFILE=1
 DBG_MAKEFILE ?=
+# 在 Makefile 中，?= 是一个条件赋值操作符，它的作用是：如果变量未定义，则使用?=右侧的值来定义变量；如果变量已经被定义了，则忽略?=右侧的值，保留原有的定义。
+# 是 Makefile 中的一个条件判断语句，用于检查变量 DBG_MAKEFILE 的值是否等于 1。如果条件成立（即 DBG_MAKEFILE 的值为 1），则执行 ifeq 和 endif 之间的代码块，否则跳过。
+$(info ====[test] Makefile,DBG_MAKEFILE=$(DBG_MAKEFILE))
 ifeq ($(DBG_MAKEFILE),1)
-	# Makefile:17: ***** starting Makefile for goal(s) ""
-	# Makefile:18: ***** 2023年 11月 28日 星期二 14:53:14 CST
-	# MAKECMDGOALS 这个变量怎么来的还不知道
+	# 开启 make DBG 会打印如下内容:
     $(warning ***** starting Makefile for goal(s) "$(MAKECMDGOALS)")
+    # ***** starting Makefile for goal(s) ""
+    # MAKECMDGOALS 这个变量怎么来的还不知道，显然这里变量 MAKECMDGOALS 没有任何只，就是一个空字符串
     $(warning ***** $(shell date))
+    # ***** 2023年 11月 28日 星期二 14:53:14 CST
+    # 使 make 在执行过程中打印更多的详细信息
 else
-    # 如果我们不调试 Makefile，就不要回显 recipes，使用 MAKEFLAGS 设置编译选项 -s 即 silent 安静模式
     MAKEFLAGS += -s
+    # 在 Makefile 中，+= 是一个赋值操作符，用于向变量中追加内容。它的作用是将右侧的值追加到左侧的变量值之后。如果左侧的变量尚未定义，则等同于简单的赋值操作符 =。
+    # 如果我们不调试 Makefile，就不要回显 recipes，使用 MAKEFLAGS 设置编译选项 -s 即 silent 安静模式
+	# 在Makefile中，MAKEFLAGS 是一个特殊的内置变量，用于传递给 make 命令的标志和选项。
+	#     -s 标志用于使Make在执行过程中处于安静模式，即不输出命令的执行过程，只输出结果。
+	#     因此，MAKEFLAGS += -s 的作用是在Make执行时将安静模式标志 -s 添加到MAKEFLAGS 变量中，以在执行过程中关闭大部分输出信息。
 endif
+$(info ====[test] Makefile,MAKEFLAGS=$(MAKEFLAGS))
 
 
 # Old-skool build tools.
@@ -37,17 +47,22 @@ endif
 # It's necessary to set this because some environments don't link sh -> bash.
 # 配置 shell 的路径，目的是直接使用 bash shell 而不是系统默认的 sh 环境
 SHELL := /usr/bin/env bash -o errexit -o pipefail -o nounset
-# bash 脚本程序涉及记录日志的一些配置，比如函数定义等
+$(info ====[test] Makefile,SHELL=$(SHELL))
+
+# ./hack/lib/logging.sh 这个文件用于 bash 脚本程序记录日志的一些配置，比如打印函数定义等
 BASH_ENV := ./hack/lib/logging.sh
+$(info ====[test] Makefile,BASH_ENV=$(BASH_ENV))
 
 # Define variables so `make --warn-undefined-variables` works.
 # PRINT_HELP 变量 表示是否打印帮助信息
 # 条件赋值 ( ?= ) 如果变量未定义，则使用符号中的值定义变量。如果该变量已经赋值，则该赋值语句无效。
 PRINT_HELP ?=
+$(info ====[test] Makefile,PRINT_HELP=$(PRINT_HELP))
 
 # We don't need make's built-in rules.
 # 扩展编译选项 --no-builtin-rules
 MAKEFLAGS += --no-builtin-rules
+$(info ====[test] Makefile,MAKEFLAGS=$(MAKEFLAGS))
 
 # 空的 target
 .SUFFIXES:
@@ -58,14 +73,18 @@ MAKEFLAGS += --no-builtin-rules
 .EXPORT_ALL_VARIABLES:
 # OUT_DIR 表示最终生成的 target 文件的目录，包括可执行文件、镜像、中间文件等
 OUT_DIR ?= _output
+$(info ====[test] Makefile,OUT_DIR=$(OUT_DIR))
+
 # BIN_DIR 表示生成 target 可执行文件的目录
 BIN_DIR := $(OUT_DIR)/bin
+$(info ====[test] Makefile,BIN_DIR=$(BIN_DIR))
+
 # kubernetes 的项目跟路径，就是 go.mod 里面模块的名字
 PRJ_SRC_PATH := k8s.io/kubernetes
-
+$(info ====[test] Makefile,PRJ_SRC_PATH=$(PRJ_SRC_PATH))
 
 # 设置 vendor 模式
-# KUBE_GOFLAGS 已经丢弃，使用 GOFLAGS
+# KUBE_GOFLAGS 已经被废弃，后面都使用 GOFLAGS
 # go build 编译 golang 程序的时候，使用 GOFLAGS 来指定编译标识，而本项目单独给 makefile 定义了编译选项 KUBE_GOFLAGS 来表示
 # 在命令行编译 k8s 的时候，如果要给 go build 配置编译选项，那么就在命令行上指定 KUBE_GOFLAGS
 ifdef KUBE_GOFLAGS
@@ -77,10 +96,12 @@ else
 $(error Both KUBE_GOFLAGS and GOFLAGS are set. Please use just GOFLAGS)
 endif
 endif
+$(info ====[test] Makefile,GOFLAGS=$(GOFLAGS))
 
 # This controls the verbosity of the build.  Higher numbers mean more output.
 # 控制脚本输出和日志记录的详细程度, KUBE_VERBOSE=1
 KUBE_VERBOSE ?= 1
+$(info ====[test] Makefile,KUBE_VERBOSE=$(KUBE_VERBOSE))
 
 # make all 编译所有组件
 # 真正执行编译动作的脚本是 hack/make-rules/build.sh $(WHAT)
